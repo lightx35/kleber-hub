@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Galerie Photo</title>
+  <link rel="stylesheet" href="/public/css/style.css">
+</head>
+<body>
+<header class="container">
+  <h1>Galerie Photo (Node + Render)</h1>
+  <nav>
+    <a href="/">Accueil</a>
+    <a href="/authorize">Autoriser cet appareil</a>
+  </nav>
+</header>
+<main class="container">
+  <section>
+    <h2>Galerie</h2>
+    <% if (canUpload) { %>
+      <form class="card" action="/upload" method="post" enctype="multipart/form-data">
+        <label for="photo">Choisissez une image (JPG/PNG, max 5 Mo) :</label>
+        <input type="file" id="photo" name="photo" accept="image/jpeg,image/png" required>
+        <button type="submit">Uploader</button>
+      </form>
+    <% } else { %>
+      <div class="notice">
+        Cet appareil n'a pas les droits d'upload.
+        <a href="/authorize">Autoriser cet appareil</a>.
+      </div>
+    <% } %>
+  </section>
+
+  <section class="grid">
+    <% if (!photos || photos.length === 0) { %>
+      <p>Aucune photo pour le moment.</p>
+    <% } else { %>
+      <% photos.forEach(p => { %>
+        <figure class="card">
+          <img src="<%- p.url %>" alt="<%- p.filename %>">
+          <figcaption>Ajoutée le <%- new Date(p.uploaded_at).toLocaleString('fr-FR') %></figcaption>
+        </figure>
+      <% }) %>
+    <% } %>
+  </section>
+</main>
+<footer class="container">
+  <p>&copy; <%= new Date().getFullYear() %> Mon Site Photo</p>
+</footer>
+</body>
+</html>

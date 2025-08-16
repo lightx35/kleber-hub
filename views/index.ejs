@@ -20,7 +20,7 @@
     <% if (canUpload) { %>
       <form class="card" action="/upload" method="post" enctype="multipart/form-data">
         <label for="photo">Choisissez une image (JPG/PNG, max 5 Mo) :</label>
-        <input type="file" id="photo" name="photo" accept="image/jpeg,image/png" required>
+        <input type="file" id="photo" name="image" accept="image/jpeg,image/png" required>
         <button type="submit">Uploader</button>
       </form>
     <% } else { %>

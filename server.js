@@ -4,6 +4,9 @@
  * - Upload d'images vers Cloudinary
  * - PostgreSQL pour stocker URLs et devices
  */
+
+const fs = require('fs');
+const exif = require('exif-parser');
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
@@ -118,7 +121,11 @@ app.get('/healthz', (req, res) => res.status(200).send('ok'));
 
 app.get('/', async (req, res) => {
   try {
-    const { rows } = await pool.query('SELECT * FROM photos ORDER BY uploaded_at DESC LIMIT 200');
+    const { rows } = await pool.query(`
+      SELECT * FROM photos
+      ORDER BY COALESCE(taken_at, uploaded_at) DESC
+      LIMIT 200
+    `);
     const canUpload = await isAllowedToUpload(req.deviceToken);
     res.render('index', { photos: rows, canUpload });
   } catch (e) {
@@ -152,37 +159,47 @@ app.post('/authorize', async (req, res) => {
   }
 });
 
-app.post('/upload', upload.single('photo'), async (req, res) => {
+app.post('/upload', upload.single('image'), async (req, res) => {
   try {
-    if (!await isAllowedToUpload(req.deviceToken)) {
-      return res.status(403).send('Accès refusé.');
-    }
     if (!req.file) return res.redirect('/');
 
-    // Upload vers Cloudinary
-    const uploadStream = cloudinary.uploader.upload_stream(
-      { folder: 'node_render_site', resource_type: 'image' },
-      async (error, result) => {
-        if (error) {
-          console.error('Cloudinary error:', error);
-          return res.status(500).send('Erreur upload Cloudinary.');
-        }
-        const filename = result.public_id.split('/').pop();
-        const url = result.secure_url;
-        // Lier à l'appareil
-        const d = await getCurrentDevice(req.deviceToken);
-        const deviceId = d ? d.id : null;
-        await pool.query(
-          'INSERT INTO photos (filename, url, device_id) VALUES ($1, $2, $3)',
-          [filename, url, deviceId]
-        );
-        return res.redirect('/');
+    // 1️⃣ Extraire les métadonnées EXIF depuis le buffer
+    let takenDate = null;
+    try {
+      const parser = exif.create(req.file.buffer);
+      const result = parser.parse();
+      if (result.tags && result.tags.DateTimeOriginal) {
+        takenDate = new Date(result.tags.DateTimeOriginal * 1000);
       }
+    } catch (ex) {
+      console.warn('Impossible de lire les métadonnées EXIF:', ex.message);
+    }
+
+    // 2️⃣ Envoyer la photo sur Cloudinary depuis le buffer
+    const uploadResult = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: "uploads" },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      stream.end(req.file.buffer);
+    });
+
+    const filename = uploadResult.public_id.split('/').pop();
+    const url = uploadResult.secure_url;
+
+    // 3️⃣ Enregistrer dans PostgreSQL : filename + URL + date EXIF
+    await pool.query(
+      'INSERT INTO photos (filename, url, taken_at) VALUES ($1, $2, $3)',
+      [filename, url, takenDate]
     );
-    uploadStream.end(req.file.buffer);
-  } catch (e) {
-    console.error(e);
-    res.status(500).send('Erreur serveur.');
+
+    res.redirect('/');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erreur upload');
   }
 });
 

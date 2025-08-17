@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Galerie Photo</title>
+  <title>Toilet App</title>
   <link rel="stylesheet" href="/public/css/toilet-app.css">
 </head>
 <body>
@@ -11,24 +11,16 @@
   <h1>Galerie Photo (Node + Render)</h1>
   <nav>
     <a href="/">Accueil</a>
-    <a href="/authorize">Autoriser cet appareil</a>
   </nav>
 </header>
 <main class="container">
   <section>
-    <h2>Galerie</h2>
-    <% if (canUpload) { %>
-      <form class="card" action="/upload" method="post" enctype="multipart/form-data">
-        <label for="photo">Choisissez une image (JPG/PNG, max 5 Mo) :</label>
-        <input type="file" id="photo" name="image" accept="image/jpeg,image/png" required>
-        <button type="submit">Uploader</button>
-      </form>
-    <% } else { %>
-      <div class="notice">
-        Cet appareil n'a pas les droits d'upload.
-        <a href="/authorize">Autoriser cet appareil</a>.
-      </div>
-    <% } %>
+    <h2>Uploader une photo</h2>
+    <form class="card" action="/upload" method="post" enctype="multipart/form-data">
+      <label for="photo">Choisissez une image (JPG/PNG, max 5 Mo) :</label>
+      <input type="file" id="photo" name="image" accept="image/jpeg,image/png" required>
+      <button type="submit">Uploader</button>
+    </form>
   </section>
 
   <section class="grid">

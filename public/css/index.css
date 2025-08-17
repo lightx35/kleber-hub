@@ -2,7 +2,6 @@ body{
     margin: 0;
     padding: 0;
     height: 100vh;
-    overflow: hidden;
 }
 
 
@@ -22,7 +21,7 @@ main {
     margin-left : 15%;
     margin-right: 15%;
     padding-top: 3%;
-    width: 70%;
+    width: 100%;
     text-align: center;
 }
 
@@ -32,14 +31,14 @@ main {
 }
 
 #welcome h1 {
-    font-size: clamp(3em,8vw, 100em);
+    font-size: clamp(5em,8vw, 100em);
     color: #f2ed51;
     font-family: "Archivo Black", sans-serif;
     font-style: normal;
 }
 
 #welcome h2 {
-    font-size: clamp(1em,3vw,100em);
+    font-size: clamp(2.5em,3vw,100em);
     font-family: "Archivo Black", sans-serif;
     font-style: normal;
     color: #e2c929;
@@ -102,12 +101,15 @@ main {
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    flex-wrap: wrap;
     width: 100%;
 }
 
 .apps-container {
     width: 13%;
     height: 80%;
+    min-width: 120px;
+    min-height: 125px;
     margin-left: 3%;
     margin-right: 3%;
 }
@@ -116,6 +118,7 @@ main {
     border-radius: 15px;
     width: 100%;
     height: 100%;
+    aspect-ratio: 1/1;
 }
 
 .apps-container p{
@@ -126,3 +129,76 @@ main {
     margin-block-end: 0;
 }
 
+
+/* -----phone responsive-------- */
+@media (max-width: 740px) {
+
+    /* -----welcome-------- */
+    #welcome {
+        margin-top: 5%;
+    }
+
+    #welcome h1 {
+    font-size: clamp(2.8em,9vw, 100em);
+    }
+
+    #welcome h2 {
+        font-size: clamp(1.4em,4vw,100em);
+    }
+    /* -----login-------- */
+    #login-container {
+    width: 150px;
+    margin-bottom: 5%;
+    margin-top: 2%;
+}
+
+
+    #user-face {
+        width: 100px;
+        height: 95px;
+    }
+
+    #login-link {
+    height: 30px;
+    font-size: 15px;
+    }
+
+    /* -----services-------- */
+    #services {
+        border-radius: 30% 30% 0px 0px;
+    }
+
+
+    #services h3 {
+        font-size: clamp(1.5em,5vw,100em);
+        margin-block-start: 10px;
+        margin-block-end: 1%;
+    }
+
+    #apps{
+        display: grid;
+        grid-template-columns: repeat(2, 50%);
+        grid-template-rows: repeat(2, 50%);
+        justify-items: center;
+        align-items: center;
+        width: 90vmin;   
+        height: 90vmin;
+        gap: 2%;
+    }
+
+    .apps-container {
+    width: 80%;
+    height: 80%;
+    min-height: 80px;
+    }
+
+    .apps-container img{
+        border-radius: 15px;
+    }
+
+    .apps-container p{
+        font-size: clamp(0.9em,3vw,100em);
+        margin-block-start: 0px;
+        
+    }
+}

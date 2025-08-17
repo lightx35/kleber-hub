@@ -5,15 +5,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Galerie Photo</title>
   <link rel="stylesheet" href="/public/css/index.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
 </head>
 <body>
 <header>
 </header>
 <main>
-    <h1>Yo les bg</h1>
-    <a href="toilet-app.ejs">toilet app</a>
+  <div id = "welcome">
+    <h2>Bienvenue sur le</h2>
+    <h1>Kléber Hub</h1>
+  </div>
+  <div id="login-container">
+    <div id="user-face"><img src="../public/images/unknow-face.png" id="user-face"></div>
+    <div id="login-link">Se connecter</div>
+  </div>
+  <div id="services">
+    <h3>services</h3>
+    <div id="apps">
+      <div id="toilet-app-container" class="apps-container">
+        <a href="/toilet-app" id="toilet-app-link" class="apps-link"><img src="../public/images/toilet.jpg" alt=""></a>
+        <p>Toilet app</p>
+      </div>
+      <div id="mim-container" class="apps-container">
+        <a href="/toilet-app" id="mim-link" class="apps-link"><img src="../public/images/chantier.png" alt=""></a>
+        <p>En chantier</p>
+      </div>
+      <div id="yt-container" class="apps-container">
+        <a href="/toilet-app" id="yt-app-link" class="apps-link"><img src="../public/images/chantier.png" alt=""></a>
+        <p>En chantier</p>
+      </div>
+      <div id="mdk-container" class="apps-container">
+        <a href="/toilet-app" id="mdk-app-link" class="apps-link"><img src="../public/images/chantier.png" alt=""></a>
+        <p>En chantier</p>
+      </div>
+    </div>
+  </div>
 </main>
-<footer>
-</footer>
 </body>
 </html>
+

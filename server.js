@@ -129,7 +129,7 @@ app.get('/toilet-app', async (req, res) => {
 });
 
 // --- Route index ---
-app.get('/index', async (req, res) => {
+app.get('/', async (req, res) => {
   try {
     // Récupération de l'utilisateur courant via le device token
     const user = await getUserByDevice(req.deviceToken);

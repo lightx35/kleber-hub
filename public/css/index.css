@@ -1,7 +1,128 @@
-h1{
-    font-size: 2em;
-    color: #333;
-    text-align: center;
-    margin-top: 20px;
-
+body{
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
 }
+
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+}
+
+
+
+
+/* -----welcome-------- */
+#welcome{
+    margin-left : 15%;
+    margin-right: 15%;
+    padding-top: 3%;
+    width: 70%;
+    text-align: center;
+}
+
+#welcome h1, h2 {
+   margin: 0;
+   padding: 0;
+}
+
+#welcome h1 {
+    font-size: clamp(3em,8vw, 100em);
+    color: #f2ed51;
+    font-family: "Archivo Black", sans-serif;
+    font-style: normal;
+}
+
+#welcome h2 {
+    font-size: clamp(1em,3vw,100em);
+    font-family: "Archivo Black", sans-serif;
+    font-style: normal;
+    color: #e2c929;
+}
+
+/* -----login-------- */
+
+#login-container {
+    width: 200px;
+    margin-bottom: 10px;
+}
+
+#user-face {
+    width: 135px;
+    height: 130px;
+    margin: auto;
+}
+
+
+#login-link {
+    width: 100%;
+    height: 40px;
+    background-color: #f4ee45;
+    color: #000000;
+    font-size: 20px;
+    font-family: "Archivo Black", sans-serif;
+    cursor: pointer;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* -----services-------- */
+#services {
+    width:  100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    background-color: #ffe415b8;
+    border-radius: 60% 60% 0px 0px;
+    padding: 3% 1% 5% 1%;
+}
+
+
+
+#services h3 {
+    font-size: clamp(2em,2.5vw,100em);
+    font-family: "Archivo Black", sans-serif;
+    font-style: normal;
+    color: #000000;
+    margin-top: 2%;
+    margin-block-start: 0;
+    margin-block-end: 0;
+}
+   
+#apps {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.apps-container {
+    width: 13%;
+    height: 80%;
+    margin-left: 3%;
+    margin-right: 3%;
+}
+
+.apps-container img{
+    border-radius: 15px;
+    width: 100%;
+    height: 100%;
+}
+
+.apps-container p{
+    text-align: center;
+    font-size: clamp(0.5em,1.7vw,100em);
+    font-family: "Archivo Black", sans-serif;
+    margin-block-start: 10px;
+    margin-block-end: 0;
+}
+

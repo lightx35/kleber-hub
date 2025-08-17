@@ -110,7 +110,7 @@ app.get('/toilet-app', async (req, res) => {
   try {
     // Récupération des photos avec le nom de l'utilisateur
     const { rows } = await pool.query(`
-      SELECT photos.*, users.username
+      SELECT photos.*, users.id
       FROM photos
       JOIN users ON photos.user_id = users.id
       ORDER BY COALESCE(taken_at, uploaded_at) DESC
@@ -128,14 +128,14 @@ app.get('/toilet-app', async (req, res) => {
   }
 });
 
-// --- Route Kleber Hub ---
-app.get('/kleber-hub', async (req, res) => {
+// --- Route index ---
+app.get('/index', async (req, res) => {
   try {
     // Récupération de l'utilisateur courant via le device token
     const user = await getUserByDevice(req.deviceToken);
 
-    // Affichage de la vue kleber-hub.ejs
-    res.render('kleber-hub', { user });
+    // Affichage de la vue index.ejs
+    res.render('index', { user });
   } catch (e) {
     console.error(e);
     res.status(500).send('Erreur serveur');

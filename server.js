@@ -1,8 +1,8 @@
 /**
- * Serveur Express pour galerie photo
- * - Auth par appareil via cookie 'device_token'
+ * Serveur Express pour galerie photo (version avec users)
+ * - Auth par utilisateur (users) + devices connus dans la table users
  * - Upload d'images vers Cloudinary
- * - PostgreSQL pour stocker URLs et devices
+ * - PostgreSQL pour stocker URLs et utilisateurs
  */
 
 const fs = require('fs');
@@ -29,9 +29,6 @@ app.use(cookieParser());
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // --- Cloudinary config ---
-if (!process.env.CLOUDINARY_CLOUD_NAME) {
-  console.warn('⚠️ CLOUDINARY_* non configuré. Configurez vos variables d\'environnement.');
-}
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -39,9 +36,6 @@ cloudinary.config({
 });
 
 // --- PostgreSQL ---
-if (!process.env.DATABASE_URL) {
-  console.warn('⚠️ DATABASE_URL non configurée. Configurez vos variables d\'environnement.');
-}
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false } // Render Postgres requiert SSL
@@ -49,31 +43,34 @@ const pool = new Pool({
 
 async function initDb() {
   await pool.query(`
-    CREATE TABLE IF NOT EXISTS devices (
+    CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
-      device_token VARCHAR(64) UNIQUE NOT NULL,
-      can_upload BOOLEAN NOT NULL DEFAULT FALSE,
+      username VARCHAR(50) UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      devices TEXT[], -- tokens des appareils connus
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
   `);
+
   await pool.query(`
     CREATE TABLE IF NOT EXISTS photos (
       id SERIAL PRIMARY KEY,
       filename VARCHAR(255) NOT NULL,
       url TEXT NOT NULL,
-      device_id INTEGER REFERENCES devices(id) ON DELETE SET NULL,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      taken_at TIMESTAMPTZ,
       uploaded_at TIMESTAMPTZ DEFAULT NOW()
     );
   `);
-  console.log('✅ Tables vérifiées.');
+
+  console.log('✅ Tables users + photos vérifiées.');
 }
 
 // --- Middleware device token ---
-app.use(async (req, res, next) => {
+app.use((req, res, next) => {
   let token = req.cookies.device_token;
   if (!token) {
     token = crypto.randomBytes(16).toString('hex');
-    // cookie 5 ans, httpOnly
     const isSecure = req.protocol === 'https' || (req.get('x-forwarded-proto') === 'https');
     res.cookie('device_token', token, {
       maxAge: 1000 * 60 * 60 * 24 * 365 * 5,
@@ -83,27 +80,16 @@ app.use(async (req, res, next) => {
     });
   }
   req.deviceToken = token;
-
-  // Ensure device exists in DB
-  try {
-    await pool.query(
-      'INSERT INTO devices (device_token) VALUES ($1) ON CONFLICT (device_token) DO NOTHING',
-      [token]
-    );
-  } catch (e) {
-    console.error('DB error creating device:', e);
-  }
   next();
 });
 
-// --- Helper: get device + check rights ---
-async function getCurrentDevice(token) {
-  const { rows } = await pool.query('SELECT * FROM devices WHERE device_token = $1', [token]);
+// --- Helper: récupérer l’utilisateur depuis son device ---
+async function getUserByDevice(token) {
+  const { rows } = await pool.query(
+    `SELECT * FROM users WHERE $1 = ANY(devices) LIMIT 1`,
+    [token]
+  );
   return rows[0] || null;
-}
-async function isAllowedToUpload(token) {
-  const d = await getCurrentDevice(token);
-  return d && d.can_upload === true;
 }
 
 // --- Multer (mémoire) ---
@@ -119,51 +105,55 @@ const upload = multer({
 // --- Routes ---
 app.get('/healthz', (req, res) => res.status(200).send('ok'));
 
-app.get('/', async (req, res) => {
+// --- Route Toilet App ---
+app.get('/toilet-app', async (req, res) => {
   try {
+    // Récupération des photos avec le nom de l'utilisateur
     const { rows } = await pool.query(`
-      SELECT * FROM photos
+      SELECT photos.*, users.username
+      FROM photos
+      JOIN users ON photos.user_id = users.id
       ORDER BY COALESCE(taken_at, uploaded_at) DESC
       LIMIT 200
     `);
-    const canUpload = await isAllowedToUpload(req.deviceToken);
-    res.render('index', { photos: rows, canUpload });
+
+    // Récupération de l'utilisateur courant via le device token
+    const user = await getUserByDevice(req.deviceToken);
+
+    // Affichage de la vue toilet-app.ejs
+    res.render('toilet-app', { photos: rows, user });
   } catch (e) {
     console.error(e);
     res.status(500).send('Erreur serveur');
   }
 });
 
-app.get('/authorize', async (req, res) => {
-  res.render('authorize', { ok: false, error: '' });
-});
+// --- Route Kleber Hub ---
+app.get('/kleber-hub', async (req, res) => {
+  try {
+    // Récupération de l'utilisateur courant via le device token
+    const user = await getUserByDevice(req.deviceToken);
 
-app.post('/authorize', async (req, res) => {
-  const code = (req.body.code || '').trim();
-  if (!process.env.ADMIN_CODE) {
-    return res.status(500).send('ADMIN_CODE non configuré');
-  }
-  if (Buffer.from(process.env.ADMIN_CODE).length === Buffer.from(code).length &&
-      crypto.timingSafeEqual(Buffer.from(process.env.ADMIN_CODE), Buffer.from(code))) {
-    try {
-      const d = await getCurrentDevice(req.deviceToken);
-      if (!d) return res.render('authorize', { ok: false, error: 'Appareil introuvable.' });
-      await pool.query('UPDATE devices SET can_upload = TRUE WHERE id = $1', [d.id]);
-      return res.render('authorize', { ok: true, error: '' });
-    } catch (e) {
-      console.error(e);
-      return res.render('authorize', { ok: false, error: 'Erreur base de données.' });
-    }
-  } else {
-    return res.render('authorize', { ok: false, error: 'Code incorrect.' });
+    // Affichage de la vue kleber-hub.ejs
+    res.render('kleber-hub', { user });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send('Erreur serveur');
   }
 });
 
+// route upload
 app.post('/upload', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.redirect('/');
 
-    // 1️⃣ Extraire les métadonnées EXIF depuis le buffer
+    // Vérif utilisateur
+    const user = await getUserByDevice(req.deviceToken);
+    if (!user) {
+      return res.status(403).send('⚠️ Vous devez être connecté pour uploader.');
+    }
+
+    // Lire les métadonnées EXIF
     let takenDate = null;
     try {
       const parser = exif.create(req.file.buffer);
@@ -175,7 +165,7 @@ app.post('/upload', upload.single('image'), async (req, res) => {
       console.warn('Impossible de lire les métadonnées EXIF:', ex.message);
     }
 
-    // 2️⃣ Envoyer la photo sur Cloudinary depuis le buffer
+    // Upload Cloudinary
     const uploadResult = await new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         { folder: "uploads" },
@@ -190,10 +180,10 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     const filename = uploadResult.public_id.split('/').pop();
     const url = uploadResult.secure_url;
 
-    // 3️⃣ Enregistrer dans PostgreSQL : filename + URL + date EXIF
+    // Sauvegarde DB
     await pool.query(
-      'INSERT INTO photos (filename, url, taken_at) VALUES ($1, $2, $3)',
-      [filename, url, takenDate]
+      'INSERT INTO photos (filename, url, taken_at, user_id) VALUES ($1, $2, $3, $4)',
+      [filename, url, takenDate, user.id]
     );
 
     res.redirect('/');

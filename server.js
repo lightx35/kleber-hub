@@ -193,6 +193,45 @@ app.post('/upload', upload.single('image'), async (req, res) => {
   }
 });
 
+// Route login
+const bcrypt = require('bcrypt'); // si tu veux sécuriser les mots de passe
+
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    // Vérifier si l'utilisateur existe
+    const { rows } = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+    const user = rows[0];
+
+    if (!user) {
+      return res.status(401).send("Utilisateur introuvable");
+    }
+
+    // Vérifier le mot de passe
+    const valid = await bcrypt.compare(password, user.password_hash);
+    if (!valid) {
+      return res.status(401).send("Mot de passe incorrect");
+    }
+
+    // Associer le device_token à l’utilisateur
+    const token = req.deviceToken;
+    await pool.query(
+      `UPDATE users SET devices = array_append(devices, $1) WHERE id = $2 AND NOT ($1 = ANY(devices))`,
+      [token, user.id]
+    );
+
+    // Stocker l'ID utilisateur en cookie pour la session
+    res.cookie("user_id", user.id, { httpOnly: true });
+
+    // Rediriger vers l'accueil
+    res.redirect('/');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Erreur serveur");
+  }
+});
+
 // Démarrage
 initDb().then(() => {
   app.listen(PORT, () => {

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Galerie Photo</title>
+  <title>Kleber Hub</title>
   <link rel="stylesheet" href="/public/css/index.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,12 +15,33 @@
 <main>
   <div id = "welcome">
     <h2>Bienvenue sur le</h2>
-    <h1>Kléber Hub</h1>
+    <h1>Kleber Hub</h1>
   </div>
   <div id="login-container">
-    <div id="user-face"><img src="../public/images/unknow-face.png" id="user-face"></div>
+    <div id="user-face">
+      <% if (user) { %>
+        <img src="<%= user.profile_pic %>" width="100">
+      <% } else { %>
+        <img src="../public/images/unknow-face.png" id="user-face" width="100">
+      <% } %>
+    </div>
     <div id="login-link">Se connecter</div>
   </div>
+  <div id="login-pop-up-background">
+    <div id="login-pop-up">
+        <h2>Connexion</h2>
+        <form id="loginForm" method="POST" action="/login">
+          <label for="username">Prénom :</label>
+          <input type="text" id="username" name="username" required>
+
+          <label for="password">Mot de passe :</label>
+          <input type="password" id="password" name="password" required>
+
+          <button type="submit">Confirmer</button>
+        </form>
+    </div>
+  </div>
+  
   <div id="services">
     <h3>services</h3>
     <div id="apps">
@@ -45,4 +66,5 @@
 </main>
 </body>
 </html>
+<script src="../public/js/index.js"></script>
 

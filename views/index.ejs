@@ -25,11 +25,11 @@
         <img src="../public/images/unknow-face.png" id="user-face">
       <% } %>
     </div>
-    <div id="login-link">
+    <div id="log-link">
       <% if (user) { %> 
-        <a href="/logout">Se déconnecter</a>
+        <a href="/logout" id="logout-link">Se déconnecter</a>
       <% } else { %>
-        <a href="">Se déconnecter</a>
+        <a id="login-link">Se connecter</a>
       <% } %>
     </div>
   </div>

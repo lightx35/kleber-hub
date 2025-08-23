@@ -15,6 +15,8 @@ const { Pool } = require('pg');
 const dotenv = require('dotenv');
 const crypto = require('crypto');
 const cloudinary = require('cloudinary').v2;
+const bcrypt = require('bcrypt');
+
 
 dotenv.config();
 
@@ -194,7 +196,6 @@ app.post('/upload', upload.single('image'), async (req, res) => {
 });
 
 // Route login
-const bcrypt = require('bcrypt'); // si tu veux sécuriser les mots de passe
 
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;

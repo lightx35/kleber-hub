@@ -20,9 +20,10 @@
   <div id="login-container">
     <div id="user-face">
       <% if (user) { %>
-        <img src="<%= user.profile_pic %>" width="100">
+        <img src="<%= user.profile_pic %>" id="user-face">
+        <p>Bienvenue, <%= user.username %> !</p>
       <% } else { %>
-        <img src="../public/images/unknow-face.png" id="user-face" width="100">
+        <img src="../public/images/unknow-face.png" id="user-face">
       <% } %>
     </div>
     <div id="login-link">Se connecter</div>

@@ -233,6 +233,16 @@ app.post('/login', async (req, res) => {
   }
 });
 
+// Route logout
+app.get('/logout', (req, res) => {
+  // Supprimer les cookies
+  res.clearCookie("user_id");
+  res.clearCookie("device_token"); // si tu veux aussi forcer un nouveau device_token
+
+  // Rediriger vers l'accueil
+  res.redirect('/');
+});
+
 // Démarrage
 initDb().then(() => {
   app.listen(PORT, () => {

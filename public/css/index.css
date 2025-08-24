@@ -85,6 +85,7 @@ main {
 /* -----login pop up-------- */
 
 #login-pop-up-background {
+    z-index: 2;
     display: none; 
     position: fixed;
   width: 100%;
@@ -97,6 +98,7 @@ main {
 
 
 #login-pop-up {
+    z-index: 3;
   width: auto;
   height: auto;
   background-color: #ffffff;

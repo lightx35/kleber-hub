@@ -21,15 +21,15 @@
     <div id="user-face">
       <% if (user) { %>
         <img src="<%= user.profile_pic %>" id="user-face">
-      <% } else { %>x
+      <% } else { %>
         <img src="../public/images/unknow-face.png" id="user-face">
       <% } %>
     </div>
     <div id="log-link">
       <% if (user) { %> 
-        <a href="/logout">Se déconnecter</a>
+        <a href="/logout" id="logout-link">Se déconnecter</a>
       <% } else { %>
-        <a href="#">Se connecter</a>
+        <a href="#" id="login-link">Se connecter</a>
       <% } %>
     </div>
   </div>

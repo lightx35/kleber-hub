@@ -19,18 +19,10 @@
   </div>
   <div id="login-container">
     <div id="user-face">
-      <% if (user) { %>
-        <img src="<%= user.profile_pic %>" id="user-face">
-      <% } else { %>
         <img src="../public/images/unknow-face.png" id="user-face">
-      <% } %>
     </div>
     <div id="log-link">
-      <% if (user) { %> 
-        <a href="/logout" id="logout-link">Se déconnecter</a>
-      <% } else { %>
-        <a id="login-link">Se connecter</a>
-      <% } %>
+        <a id="login-link">Se déconnecter</a>
     </div>
   </div>
   <div id="login-pop-up-background">
@@ -47,10 +39,13 @@
         </form>
     </div>
   </div>
-  
   <div id="services">
     <h3>services</h3>
-    <div id="apps">
+    <div id="lock" <% if (user) { %> style="display: none;" <% } %> >
+      <img src="../public/images/lock.png" id="lock-image">
+      connectez-vous pour accéder aux services
+    </div>
+    <div id="apps" <% if (user) { %> style="filter: blur(0px); z-index: 2;" <% } %> >
       <div id="toilet-app-container" class="apps-container">
         <a href="/toilet-app" id="toilet-app-link" class="apps-link"><img src="../public/images/toilet.jpg" alt=""></a>
         <p>Toilet app</p>

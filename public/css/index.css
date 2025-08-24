@@ -50,7 +50,7 @@ main {
 
 /* -----login-------- */
 
-#login-container {
+#log-container {
     width: 200px;
     margin: 0% 0% 1% 0%;
     display: flex;
@@ -81,6 +81,7 @@ main {
     font-size: 20px;
     font-family: "Archivo Black", sans-serif;
 }
+
 
 /* -----login pop up-------- */
 
@@ -253,7 +254,7 @@ main {
     }
     /* -----login-------- */
 
-    #login-container {
+    #log-container {
     width: 180px;
     margin: 3% 0% 5% 0%;
     }
@@ -262,7 +263,6 @@ main {
         width: 115px;
         height: 110px;
     }
-
 
     #log-link {
         width: 100%;

@@ -5,39 +5,114 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Toilet App</title>
   <link rel="stylesheet" href="/public/css/toilet-app.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
 </head>
 <body>
-<header class="container">
-  <h1>Galerie Photo (Node + Render)</h1>
-  <nav>
-    <a href="/">Accueil</a>
-  </nav>
+<header>
+  <a href="/">
+    <div id="home-link" class="header-link"><svg fill="#ffffff" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 495.398 495.398" xml:space="preserve" stroke="#ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <g> <g> <path d="M487.083,225.514l-75.08-75.08V63.704c0-15.682-12.708-28.391-28.413-28.391c-15.669,0-28.377,12.709-28.377,28.391 v29.941L299.31,37.74c-27.639-27.624-75.694-27.575-103.27,0.05L8.312,225.514c-11.082,11.104-11.082,29.071,0,40.158 c11.087,11.101,29.089,11.101,40.172,0l187.71-187.729c6.115-6.083,16.893-6.083,22.976-0.018l187.742,187.747 c5.567,5.551,12.825,8.312,20.081,8.312c7.271,0,14.541-2.764,20.091-8.312C498.17,254.586,498.17,236.619,487.083,225.514z"></path> <path d="M257.561,131.836c-5.454-5.451-14.285-5.451-19.723,0L72.712,296.913c-2.607,2.606-4.085,6.164-4.085,9.877v120.401 c0,28.253,22.908,51.16,51.16,51.16h81.754v-126.61h92.299v126.61h81.755c28.251,0,51.159-22.907,51.159-51.159V306.79 c0-3.713-1.465-7.271-4.085-9.877L257.561,131.836z"></path> </g> </g> </g> </g></svg></div>
+  </a>
+  <h1>Les Toilettes</h1>
+  <div id="account-link" class="header-link"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M5 21C5 17.134 8.13401 14 12 14C15.866 14 19 17.134 19 21M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg></div>
+  
 </header>
-<main class="container">
-  <section>
-    <h2>Uploader une photo</h2>
-    <form class="card" action="/upload" method="post" enctype="multipart/form-data">
-      <label for="photo">Choisissez une image (JPG/PNG, max 5 Mo) :</label>
-      <input type="file" id="photo" name="image" accept="image/jpeg,image/png" required>
-      <button type="submit">Uploader</button>
-    </form>
-  </section>
+<main>
+  <div id="app-container">
+    <div id="progression">Progression</div>
+    <div id="progress-bar-container">
+      <div id="start-goal" class="goal"></div>
+      <div id="progress-bar"><div id="progress-indicator"><p>150/400</p></div></div>
+      <div id="end-goal" class="goal"></div>
+    </div>
+    <nav>
+      <div class="nav-item active" id="nav-quests">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="svg-fill" fill="#000000"><g stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <path fill="none" d="M0 0h24v24H0z"></path> <path fill-rule="nonzero" d="M17.457 3L21 3.003l.002 3.523-5.467 5.466 2.828 2.829 1.415-1.414 1.414 1.414-2.474 2.475 2.828 2.829-1.414 1.414-2.829-2.829-2.475 2.475-1.414-1.414 1.414-1.415-2.829-2.828-2.828 2.828 1.415 1.415-1.414 1.414-2.475-2.475-2.829 2.829-1.414-1.414 2.829-2.83-2.475-2.474 1.414-1.414 1.414 1.413 2.827-2.828-5.46-5.46L3 3l3.546.003 5.453 5.454L17.457 3zm-7.58 10.406L7.05 16.234l.708.707 2.827-2.828-.707-.707zm9.124-8.405h-.717l-4.87 4.869.706.707 4.881-4.879v-.697zm-14 0v.7l11.241 11.241.707-.707L5.716 5.002l-.715-.001z"></path> </g> </g></svg>
+        <div class="nav-text">Quests</div>
+      </div>
+      <div class="nav-item" id="nav-gallery">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g class="svg-fill" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <circle cx="16" cy="8" r="2" class="svg-stroke" stroke="#000000" stroke-width="1.5"></circle> <path d="M2 12.5001L3.75159 10.9675C4.66286 10.1702 6.03628 10.2159 6.89249 11.0721L11.1822 15.3618C11.8694 16.0491 12.9512 16.1428 13.7464 15.5839L14.0446 15.3744C15.1888 14.5702 16.7369 14.6634 17.7765 15.599L21 18.5001" class="svg-stroke" stroke="#000000" stroke-width="1.5" stroke-linecap="round"></path> <path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" class="svg-stroke" stroke="#000000" stroke-width="1.5" stroke-linecap="round"></path> </g></svg>
+        <div class="nav-text">Gallerie</div>
+      </div>
+      <div class="nav-item" id="nav-awards">
+        <svg viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg" class="svg-fill" fill="#000000"><g  stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g fill-rule="evenodd" clip-rule="evenodd" stroke="none" stroke-width="1"> <path d="M1034.59 564.21L959.198 320L885.413 562.527H640L838.898 714.104L761.906 960L960.801 808.422L1159.7 960L1081.1 715.79L1280 564.21H1034.59Z"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M357.542 0H1562.46V119.181H1920V542.868C1920 655.236 1875.36 763.003 1795.91 842.46C1731.12 907.242 1647.52 948.879 1557.95 962.049C1544.78 1051.62 1503.15 1135.22 1438.36 1200C1360.45 1277.91 1255.32 1322.35 1145.33 1324.05V1496.31C1145.33 1510.38 1150.91 1523.87 1160.86 1533.81C1170.81 1543.76 1184.3 1549.35 1198.36 1549.35C1263.32 1549.35 1325.61 1575.15 1371.54 1621.08C1417.47 1667.01 1443.28 1729.31 1443.28 1794.26V1920H476.723V1794.26C476.723 1729.31 502.528 1667.01 548.458 1621.08C594.388 1575.15 656.682 1549.35 721.639 1549.35C735.705 1549.35 749.195 1543.76 759.14 1533.81C769.086 1523.87 774.674 1510.38 774.674 1496.31V1324.05C664.677 1322.35 559.547 1277.91 481.637 1200C416.854 1135.22 375.218 1051.62 362.048 962.049C272.477 948.879 188.877 907.242 124.095 842.46C44.6379 763.003 0 655.236 0 542.868V119.181H357.542V0ZM489.832 132.29V900.41C489.832 977.693 520.533 1051.81 575.18 1106.46C629.828 1161.11 703.946 1191.81 781.229 1191.81H906.964V1496.31C906.964 1545.46 887.439 1592.6 852.684 1627.36C817.928 1662.11 770.79 1681.64 721.639 1681.64C691.77 1681.64 663.123 1693.5 642.001 1714.63C622.429 1734.2 610.805 1760.23 609.204 1787.71H1310.8C1309.2 1760.23 1297.57 1734.2 1278 1714.63C1256.88 1693.5 1228.23 1681.64 1198.36 1681.64C1149.21 1681.64 1102.07 1662.11 1067.32 1627.36C1032.56 1592.6 1013.04 1545.46 1013.04 1496.31V1191.81H1138.77C1216.05 1191.81 1290.17 1161.11 1344.82 1106.46C1399.47 1051.81 1430.17 977.693 1430.17 900.41V132.29H489.832ZM357.542 251.471H132.29V542.868C132.29 620.151 162.991 694.269 217.638 748.917C256.412 787.69 304.988 814.409 357.542 826.659V251.471ZM1562.46 826.659V251.471H1787.71V542.868C1787.71 620.151 1757.01 694.269 1702.36 748.917C1663.59 787.69 1615.01 814.409 1562.46 826.659Z"></path> </g> </g></svg>
+        <div class="nav-text">Récompenses</div>
+      </div>
+    </nav>
+    <div id="info-display">
+      <div id="quest-display">
+        <div class="quest-container">
+          <h3>Quête Journalière</h3>
+          <h3>+5</h3>
+          <div class="quest-responsive-phone-display">
+            <div class="submit-quest" data-quest-id="daily"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 16C13.6569 16 15 14.6569 15 13C15 11.3431 13.6569 10 12 10C10.3431 10 9 11.3431 9 13C9 14.6569 10.3431 16 12 16Z" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M3 16.8V9.2C3 8.0799 3 7.51984 3.21799 7.09202C3.40973 6.71569 3.71569 6.40973 4.09202 6.21799C4.51984 6 5.0799 6 6.2 6H7.25464C7.37758 6 7.43905 6 7.49576 5.9935C7.79166 5.95961 8.05705 5.79559 8.21969 5.54609C8.25086 5.49827 8.27836 5.44328 8.33333 5.33333C8.44329 5.11342 8.49827 5.00346 8.56062 4.90782C8.8859 4.40882 9.41668 4.08078 10.0085 4.01299C10.1219 4 10.2448 4 10.4907 4H13.5093C13.7552 4 13.8781 4 13.9915 4.01299C14.5833 4.08078 15.1141 4.40882 15.4394 4.90782C15.5017 5.00345 15.5567 5.11345 15.6667 5.33333C15.7216 5.44329 15.7491 5.49827 15.7803 5.54609C15.943 5.79559 16.2083 5.95961 16.5042 5.9935C16.561 6 16.6224 6 16.7454 6H17.8C18.9201 6 19.4802 6 19.908 6.21799C20.2843 6.40973 20.5903 6.71569 20.782 7.09202C21 7.51984 21 8.0799 21 9.2V16.8C21 17.9201 21 18.4802 20.782 18.908C20.5903 19.2843 20.2843 19.5903 19.908 19.782C19.4802 20 18.9201 20 17.8 20H6.2C5.0799 20 4.51984 20 4.09202 19.782C3.71569 19.5903 3.40973 19.2843 3.21799 18.908C3 18.4802 3 17.9201 3 16.8Z" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg></div>
+            <div class="quest-description">Ajouter une photo de naophel qui fait caca</div>
+          </div>
+        </div>
+        <div class="quest-container">
+          <h3>Quête Spéciale</h3>
+          <h3>+10</h3>
+          <div class="quest-responsive-phone-display">
+            <div class="submit-quest" data-quest-id="special"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 16C13.6569 16 15 14.6569 15 13C15 11.3431 13.6569 10 12 10C10.3431 10 9 11.3431 9 13C9 14.6569 10.3431 16 12 16Z" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M3 16.8V9.2C3 8.0799 3 7.51984 3.21799 7.09202C3.40973 6.71569 3.71569 6.40973 4.09202 6.21799C4.51984 6 5.0799 6 6.2 6H7.25464C7.37758 6 7.43905 6 7.49576 5.9935C7.79166 5.95961 8.05705 5.79559 8.21969 5.54609C8.25086 5.49827 8.27836 5.44328 8.33333 5.33333C8.44329 5.11342 8.49827 5.00346 8.56062 4.90782C8.8859 4.40882 9.41668 4.08078 10.0085 4.01299C10.1219 4 10.2448 4 10.4907 4H13.5093C13.7552 4 13.8781 4 13.9915 4.01299C14.5833 4.08078 15.1141 4.40882 15.4394 4.90782C15.5017 5.00345 15.5567 5.11345 15.6667 5.33333C15.7216 5.44329 15.7491 5.49827 15.7803 5.54609C15.943 5.79559 16.2083 5.95961 16.5042 5.9935C16.561 6 16.6224 6 16.7454 6H17.8C18.9201 6 19.4802 6 19.908 6.21799C20.2843 6.40973 20.5903 6.71569 20.782 7.09202C21 7.51984 21 8.0799 21 9.2V16.8C21 17.9201 21 18.4802 20.782 18.908C20.5903 19.2843 20.2843 19.5903 19.908 19.782C19.4802 20 18.9201 20 17.8 20H6.2C5.0799 20 4.51984 20 4.09202 19.782C3.71569 19.5903 3.40973 19.2843 3.21799 18.908C3 18.4802 3 17.9201 3 16.8Z" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg></div>
+          <div class="quest-description">Ajouter une photo du High8nigga réunit au complet dans les toilettes</div>
+          </div>
+        </div>
+        <div class="quest-container">
+          <h3>Quête Hebdomadaire</h3>
+          <h3>+50</h3>
+          <div class="quest-responsive-phone-display">
+            <div class="submit-quest" data-quest-id="weekly"><img src="" alt=""></div>
+            <div class="quest-description">rencontrer Jeremy</div>
+          </div>
+        </div>
+      </div>
+      <div id="gallery-display">
+          <% if (photos.length > 0) { %>
+            <% photos.forEach(photo => { %>
+              <img src="<%= photo.url %>" alt="photo">
+          <% }) %>
+          <% } else { %>
+            <p>Aucune photo pour le moment.</p>
+          <% } %>
 
-  <section class="grid">
-    <% if (!photos || photos.length === 0) { %>
-      <p>Aucune photo pour le moment.</p>
-    <% } else { %>
-      <% photos.forEach(p => { %>
-        <figure class="card">
-          <img src="<%- p.url %>" alt="<%- p.filename %>">
-          <figcaption>Ajoutée le <%- new Date(p.uploaded_at).toLocaleString('fr-FR') %></figcaption>
-        </figure>
-      <% }) %>
-    <% } %>
-  </section>
+          <div id="lightbox">
+            <span id="lightbox-close">&times;</span>
+            <img id="lightbox-img" src="" alt="">
+          </div>
+      </div>
+      <div id="award-display">
+        <div class="award-container">
+          <div class="award-icon"><img src="" alt=""></div>
+          <p id="award-progress"></p>
+          <p id="award-description"></p>
+        </div>
+        <div class="award-container">
+          <div class="award-icon"><img src="" alt=""></div>
+          <p id="award-progress"></p>
+          <p id="award-description"></p>
+        </div>
+        <div class="award-container">
+          <div class="award-icon"><img src="" alt=""></div>
+          <p id="award-progress"></p>
+          <p id="award-description"></p>
+        </div>
+        <div class="award-container">
+          <div class="award-icon"><img src="" alt=""></div>
+          <p id="award-progress"></p>
+          <p id="award-description"></p>
+        </div>
+      </div>
+    </div>
+  </div>
 </main>
-<footer class="container">
-  <p>&copy; <%= new Date().getFullYear() %> Mon Site Photo</p>
+<footer>
 </footer>
+<form id="questUploadForm" method="POST" action="/upload" enctype="multipart/form-data" style="display:none;">
+  <input type="file" id="questUploadInput" name="image" accept="image/*">
+  <!-- on peut aussi mettre un champ hidden pour lier la photo à une quête -->
+  <input type="hidden" name="quest_id" id="questUploadQuestId">
+</form>
 </body>
 </html>
+<script src="../public/js/toilet-app.js"></script>

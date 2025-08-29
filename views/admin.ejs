@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Admin - Kleber Hub</title>
+  <link rel="stylesheet" href="/public/css/index.css"><!-- tu pourras faire un css admin.css séparé -->
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    h1 { margin-bottom: 20px; }
+    section { margin-bottom: 40px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    img { max-width: 150px; }
+    form { display: inline; }
+    button { margin: 2px; }
+  </style>
+</head>
+<body>
+  <h1>Admin Panel</h1>
+
+  <!-- Progression collective -->
+  <section>
+    <h2>Progression globale</h2>
+    <p>Points totaux : <%= progress.points %></p>
+  </section>
+
+  <!-- Pending photos -->
+  <section>
+    <h2>Photos en attente</h2>
+    <% if (pending.length === 0) { %>
+      <p>Aucune photo en attente</p>
+    <% } else { %>
+      <table>
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Utilisateur</th>
+            <th>Quest</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+        <% pending.forEach(p => { %>
+          <tr>
+            <td><img src="<%= p.url %>" alt=""></td>
+            <td><%= p.username || "?" %></td>
+            <td><%= p.quest_id || "-" %></td>
+            <td>
+              <form method="POST" action="/admin/pending/<%= p.id %>/approve">
+                <button type="submit">✅ Approuver</button>
+              </form>
+              <form method="POST" action="/admin/pending/<%= p.id %>/reject">
+                <button type="submit">❌ Rejeter</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </section>
+
+  <!-- Users -->
+  <section>
+    <h2>Utilisateurs</h2>
+    <ul>
+      <% users.forEach(u => { %>
+        <li>
+          <%= u.username %>
+          <form method="POST" action="/admin/users/<%= u.id %>/delete">
+            <button type="submit">Supprimer</button>
+          </form>
+        </li>
+      <% }) %>
+    </ul>
+
+    <h3>Créer un utilisateur</h3>
+    <form method="POST" action="/admin/users/create">
+      <input type="text" name="username" placeholder="Nom" required>
+      <input type="password" name="password" placeholder="Mot de passe" required>
+      <input type="text" name="profile_pic" placeholder="URL photo (optionnel)">
+      <button type="submit">Créer</button>
+    </form>
+  </section>
+
+  <!-- Quêtes hebdomadaires -->
+  <section>
+    <h2>Créer une quête hebdomadaire</h2>
+    <form method="POST" action="/admin/quests/create">
+      <input type="text" name="title" placeholder="Titre" required>
+      <input type="number" name="points" placeholder="Points" required>
+      <input type="date" name="start_at" required>
+      <input type="date" name="end_at" required>
+      <button type="submit">Créer</button>
+    </form>
+
+    <h3>Liste des quêtes</h3>
+    <ul>
+      <% quests.forEach(q => { %>
+        <li>
+          <%= q.title %> (<%= q.type %>, <%= q.points %> points)
+          <% if (q.start_at) { %>
+            du <%= q.start_at.toISOString().slice(0,10) %> au <%= q.end_at.toISOString().slice(0,10) %>
+          <% } %>
+        </li>
+      <% }) %>
+    </ul>
+  </section>
+
+</body>
+</html>

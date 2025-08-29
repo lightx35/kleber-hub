@@ -1,18 +1,410 @@
-:root { --maxw: 960px; --gap: 16px; --radius: 16px; }
-* { box-sizing: border-box; }
-body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin:0; background:#f6f7f9; color:#222; }
-header.container, main.container, footer.container { max-width: var(--maxw); margin: 0 auto; padding: 16px; }
-header { background: white; box-shadow: 0 1px 4px rgba(0,0,0,.06); position: sticky; top:0; z-index: 10; }
-header h1 { margin: 0 0 8px 0; font-size: 20px; }
-nav a { margin-right: 12px; text-decoration: none; color: #0a58ca; }
-h2 { margin-top: 16px; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: var(--gap); margin-top: var(--gap); }
-figure { margin: 0; }
-img { width: 100%; height: auto; display: block; border-radius: var(--radius); }
-.card { background: white; padding: 12px; border-radius: var(--radius); box-shadow: 0 2px 8px rgba(0,0,0,.06); margin: 12px 0; }
-form.card input[type="file"], form.card input[type="password"] { display:block; margin: 8px 0 12px 0; }
-button { padding: 10px 14px; border: 0; border-radius: 12px; cursor: pointer; background: #0a58ca; color: white; }
-.notice { background: #fff3cd; color: #664d03; padding: 12px; border-radius: var(--radius); }
-.success { background: #d1e7dd; color: #0f5132; padding: 12px; border-radius: var(--radius); }
-.error { background: #f8d7da; color: #842029; padding: 12px; border-radius: var(--radius); }
-footer { text-align: center; color: #666; }
+body {
+    margin: 0;  
+}
+
+/* text */
+*{
+    font-family: "Archivo Black", sans-serif;
+}
+
+/* header */
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2%;
+    margin-bottom: 0;
+}
+
+header h1 {
+    margin: 0;
+    font-size: clamp(2em, 5vw, 100rem);
+}
+
+.header-link {
+    background-color: #001BB7;
+    padding: 1vw;
+    width: 3.5vw;
+    height: 3.5vw;
+    border-radius: 100px;
+    border: #0046FF solid 0.8vw;
+}
+.header-link svg {
+    aspect-ratio: 1/1;
+    width: 100%;
+    height: auto;
+}
+
+/* main */
+
+#app-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #001BB7;
+    width: 90%;
+    margin: auto;
+    border-radius: 100px;
+    border: #0046FF solid 2vw;
+    padding-bottom: 5%;
+}
+
+#progression {
+    color: white;
+    font-size: clamp(1.2em, 2.5vw, 100rem);
+    padding: 1.5% 4% 1.5% 4%;
+    border-radius: 0px 0px 3vw 3vw;
+    background-color: #FF8040;
+
+}
+
+/* progress bar */
+
+#progress-bar-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 80%;
+    height: 5vw;
+    margin: 2% auto;
+}
+
+.goal {
+    position: relative;
+    z-index: 3;
+    height: 100%;
+    aspect-ratio: 1/1;
+    border-radius: 100px;
+    background-color: #FF8040;
+    
+}
+
+#start-goal {
+    margin-right: -0.1vw;
+}
+#end-goal {
+    margin-left: -0.1vw;
+}
+
+#progress-bar {
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 25%;
+    background-color: #ffffff;
+}
+
+#progress-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+    width: 37.5%;
+    height: 100%;
+    background-color: #0046FF;
+}
+
+#progress-indicator p {
+    margin: 0;
+    color: white;
+    font-size: clamp(0.6em, 1.5vw, 100rem);
+}
+
+/* nav bar */
+
+nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background-color: #ffffff;
+    width: 60%;
+    padding: 1.5vw 0px;
+    border-radius: 35px;
+    margin-bottom: 3%;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 0.8vw 1.3vw;
+    background-color: #E9E9E9;
+    border-radius: 20px;
+    cursor: pointer;
+    gap: 0.8vw;
+}
+
+.nav-item.active{
+    background-color: #FF8040;
+    color: #ffffff;
+}
+
+.nav-item.active .svg-fill{
+    fill: #ffffff;
+}
+.nav-item.active .svg-stroke {
+    stroke: #ffffff;
+}
+
+
+
+.nav-item svg {
+    width: 2.5vw;
+    height: 2.5vw;
+}
+
+.nav-text {
+    font-size: clamp(0.6em, 1.8vw, 100rem);
+}
+
+/*info display*/
+
+#info-display {
+   width: 100%;
+   height: 100%;
+}
+
+/*Quests*/
+
+#quest-display {
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    gap: 5%;
+    width: 90%;
+}
+
+.quest-container {
+    background-color: #ffffff;
+    border: #FF8040 solid 1vw;
+    border-radius: 50px;
+    width: 30%;
+    padding: 2%;
+}
+
+.quest-container h3 {
+    margin: 0;
+    margin-bottom: 2%;
+    font-size: clamp(0.4em, 1.5vw, 100rem);
+    text-align: center;
+}
+
+.submit-quest {
+    background-color: #FF8040;
+    border-radius: 100px;
+    width: 70%;
+    aspect-ratio: 1/1;
+    margin: auto;
+    margin-top: 5%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.submit-quest svg {
+    width: 70%;
+    height: 70%;
+}
+
+
+.quest-description {
+    margin: 0;
+    margin-top: 10%;
+    font-size: clamp(0.3em, 1.2vw, 100rem);
+    text-align: center;
+}
+
+/* Gallery*/
+
+#gallery-display {
+    display: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    row-gap: 2vw;
+    gap: 2vw;
+    padding: 0vw 8vw;
+    margin-top: 2%;
+}
+
+#gallery-display img{
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+    cursor: pointer;
+}   
+
+/* Lightbox */
+#lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+#lightbox img {
+    height: 80%;
+    width: auto;
+  border-radius: 10px;
+}
+
+#lightbox span {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-size: 8vw;
+  color: white;
+  cursor: pointer;
+}
+
+
+
+#award-display {
+    display: none;
+}
+
+
+/*Phone responsive */
+
+@media (max-width: 650px) {
+
+    /* header */
+
+    header {
+        padding: 4%;
+    }
+
+    header h1 {
+        font-size: clamp(1.4em, 7vw, 100rem);
+    }
+
+    .header-link {
+        padding: 1.5vw;
+        width: 4.4vw;
+        height: 4.4vw;
+        border: #0046FF solid 1.2vw;
+    }
+
+    /* main */
+
+    #app-container {
+        width: 85%;
+        border-radius: 15vw;
+        border: #0046FF solid 3vw;
+        padding-bottom: 8%;
+    }
+
+    #progression {
+        font-size: clamp(1em, 4vw, 100rem);
+        padding: 2% 6%;
+        border-radius: 0px 0px 4vw 4vw;
+    }
+
+
+    /*progress-bar*/
+
+    #progress-bar-container {
+    width: 80%;
+    height: 8vw;
+    margin: 5% auto;
+    }
+
+    #start-goal {
+        margin-right: -0.15vw;
+    }
+    #end-goal {
+        margin-left: -0.15vw;
+    }
+
+    #progress-indicator p {
+        font-size: clamp(0.4em, 1.5vw, 100rem);
+    }
+
+    /*nav*/
+
+    nav {
+    width: 80%;
+    padding: 2vw 0.6vw;
+    border-radius: 4vw;
+    }
+
+    .nav-item {
+        padding: 0.8vw 1.3vw;
+        border-radius: 4vw;
+    }
+
+    .nav-item svg {
+        width: 4vw;
+        height: 4vw;
+    }
+
+    .nav-text {
+        font-size: clamp(0.5em, 2.4vw, 100rem);
+    }
+
+
+
+    /*quest display*/
+
+    #quest-display{
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .quest-container{
+        border-radius: 30px;
+        width: 70%;
+        height: auto;
+        margin-top: 5%;
+        padding: 4%;
+    }
+
+    .quest-container h3 {
+    font-size: clamp(0.4em, 3.5vw, 100rem);
+    margin-bottom: 1%;
+    text-align: center;
+    }
+
+    .quest-responsive-phone-display{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 3%;
+    }
+
+    .submit-quest {
+        height: auto;
+        width: 40%;
+        align-self: center;
+        margin: 0;
+    }
+
+
+    .quest-description {
+    margin: 0;
+    width: 50%;
+    font-size: clamp(0.4em, 3vw, 100em);
+    align-self: center;
+    }
+
+
+    /*gallery-display*/
+
+    #gallery-display {
+        padding: 0 5vw;
+    }   
+
+    #gallery-display img{
+    width: 70px;
+    height: 70px;
+}   
+}

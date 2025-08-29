@@ -405,7 +405,7 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     const user = await getUserByDevice(req.deviceToken);
     if (!user) return res.status(403).send('Vous devez être connecté pour uploader.');
 
-    // EXIF
+    // --- EXIF ---
     let takenDate = null;
     try {
       const parser = exif.create(req.file.buffer);
@@ -417,7 +417,7 @@ app.post('/upload', upload.single('image'), async (req, res) => {
       console.warn('Impossible de lire EXIF:', ex.message);
     }
 
-    // upload Cloudinary depuis buffer
+    // --- Upload vers Cloudinary depuis buffer ---
     const uploadResult = await new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         { folder: "pending_uploads" },
@@ -429,22 +429,27 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     const filename = uploadResult.public_id.split('/').pop();
     const url = uploadResult.secure_url;
 
-    // récupère l’ID de quête
-    const questId = req.body.quest_id || null; 
+    // --- Récupérer l'ID de la quête et s'assurer que c'est un entier ---
+    let questId = req.body.quest_id;
+    if (questId) {
+      questId = parseInt(questId, 10);
+      if (isNaN(questId)) questId = null; // si ce n’est pas un nombre, on le met à null
+    }
 
-    // sauvegarde dans pending_photos
+    // --- Insérer dans pending_photos ---
     await pool.query(
       `INSERT INTO pending_photos (filename, url, user_id, device_token, quest_id, taken_at)
        VALUES ($1, $2, $3, $4, $5, $6)`,
       [filename, url, user.id, req.deviceToken, questId, takenDate]
     );
 
-    // feedback utilisateur
-    res.redirect('/toilet-app'); // ou une page de confirmation
+    // Redirection après upload
+    res.redirect('/toilet-app');
+
   } catch (err) {
-    console.error('Upload error:', err);
-    res.status(500).send(`Erreur upload: ${err.message}`);
-}
+    console.error('Erreur upload:', err);
+    res.status(500).send('Erreur upload');
+  }
 });
 
 // Route login

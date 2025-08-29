@@ -181,6 +181,8 @@ const upload = multer({
 // --- Routes ---
 app.get('/healthz', (req, res) => res.status(200).send('ok'));
 
+
+//route admin
 app.get('/admin', requireAdmin, async (req, res) => {
   try {
     const pending = (await pool.query('SELECT p.*, u.username FROM pending_photos p LEFT JOIN users u ON p.user_id = u.id ORDER BY p.created_at DESC')).rows;
@@ -195,6 +197,7 @@ app.get('/admin', requireAdmin, async (req, res) => {
   }
 });
 
+// --- Approuver une photo en attente ---
 app.post('/admin/pending/:id/approve', requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const client = await pool.connect();
@@ -202,78 +205,95 @@ app.post('/admin/pending/:id/approve', requireAdmin, async (req, res) => {
   try {
     await client.query('BEGIN');
 
-    // Récupérer la pending photo et points de la quête
-    const { rows } = await client.query(
-      `SELECT p.*, q.points AS quest_points
-       FROM pending_photos p
-       LEFT JOIN quests q ON p.quest_id::INTEGER = q.id
-       WHERE p.id = $1 FOR UPDATE`,
+    // 1️⃣ Récupérer et verrouiller la pending photo
+    const { rows: pendingRows } = await client.query(
+      'SELECT * FROM pending_photos WHERE id = $1 FOR UPDATE',
       [id]
     );
 
-    if (rows.length === 0) {
+    if (pendingRows.length === 0) {
       await client.query('ROLLBACK');
       return res.status(404).send('Pending photo introuvable');
     }
 
-    const pending = rows[0];
-    const pts = pending.quest_points ? parseInt(pending.quest_points, 10) : 0;
+    const pending = pendingRows[0];
 
-    // Vérifier que user_id existe pour la clé étrangère
-    if (!pending.user_id) {
-      await client.query('ROLLBACK');
-      return res.status(400).send('User_id manquant pour la photo');
+    // 2️⃣ Récupérer les points de la quête si quest_id présent
+    let questPoints = 0;
+    if (pending.quest_id) {
+      const { rows: questRows } = await client.query(
+        'SELECT points FROM quests WHERE id = $1',
+        [pending.quest_id]
+      );
+      if (questRows.length > 0) questPoints = questRows[0].points || 0;
     }
 
-    // Insérer la photo approuvée
+    // 3️⃣ Insérer dans photos
     await client.query(
       `INSERT INTO photos (filename, url, user_id, taken_at)
        VALUES ($1, $2, $3, $4)`,
       [pending.filename, pending.url, pending.user_id, pending.taken_at]
     );
 
-    // Mettre à jour la progression globale
-    if (pts > 0) {
+    // 4️⃣ Mettre à jour progress global
+    if (questPoints > 0) {
       await client.query(
-        `UPDATE global_progress SET points = points + $1 WHERE id = 1`,
-        [pts]
+        'UPDATE global_progress SET points = points + $1 WHERE id = 1',
+        [questPoints]
       );
     }
 
-    // Supprimer la photo de pending_photos
-    await client.query(
-      `DELETE FROM pending_photos WHERE id = $1`,
-      [id]
-    );
+    // 5️⃣ Supprimer la pending photo
+    await client.query('DELETE FROM pending_photos WHERE id = $1', [id]);
 
     await client.query('COMMIT');
     res.redirect('/admin');
 
   } catch (err) {
     await client.query('ROLLBACK').catch(() => {});
-    console.error('Approve failed', err.message, err.stack);
+    console.error('Approve failed', err.message);
     res.status(500).send('Erreur approbation');
   } finally {
     client.release();
   }
 });
 
+// --- Rejeter une photo en attente ---
 app.post('/admin/pending/:id/reject', requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id, 10);
+  const client = await pool.connect();
+
   try {
-    // (option) récupérer public_id pour suppression Cloudinary
-    const { rows } = await pool.query('SELECT filename FROM pending_photos WHERE id = $1', [id]);
-    if (rows.length === 0) return res.redirect('/admin');
+    await client.query('BEGIN');
 
-    const filename = rows[0].filename;
-    // delete from cloudinary if desired:
-    // await cloudinary.uploader.destroy(`pending_uploads/${filename}`);
+    // 1️⃣ Vérifier que la photo existe
+    const { rows: pendingRows } = await client.query(
+      'SELECT * FROM pending_photos WHERE id = $1 FOR UPDATE',
+      [id]
+    );
 
-    await pool.query('DELETE FROM pending_photos WHERE id = $1', [id]);
+    if (pendingRows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).send('Pending photo introuvable');
+    }
+
+    const pending = pendingRows[0];
+
+    // 2️⃣ Option : supprimer de Cloudinary si tu stockes public_id
+    // await cloudinary.uploader.destroy(`pending_uploads/${pending.filename}`);
+
+    // 3️⃣ Supprimer la pending photo
+    await client.query('DELETE FROM pending_photos WHERE id = $1', [id]);
+
+    await client.query('COMMIT');
     res.redirect('/admin');
-  } catch (e) {
-    console.error(e);
+
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error('Reject failed', err.message);
     res.status(500).send('Erreur rejet');
+  } finally {
+    client.release();
   }
 });
 

@@ -43,6 +43,79 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false } // Render Postgres requiert SSL
 });
 
+// --- initialisation DB ---
+async function initDb() {
+  // table users
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      username VARCHAR(50) UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      devices TEXT[],
+      profile_pic TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+  `);
+
+  // table photos
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS photos (
+      id SERIAL PRIMARY KEY,
+      filename VARCHAR(255) NOT NULL,
+      url TEXT NOT NULL,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      taken_at TIMESTAMPTZ,
+      uploaded_at TIMESTAMPTZ DEFAULT NOW()
+    );
+  `);
+
+  // table pending_photos
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS pending_photos (
+      id SERIAL PRIMARY KEY,
+      filename VARCHAR(255) NOT NULL,
+      url TEXT NOT NULL,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      device_token TEXT,
+      quest_id INTEGER,
+      taken_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+  `);
+
+  // table quests
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS quests (
+      id SERIAL PRIMARY KEY,
+      title TEXT NOT NULL,
+      description TEXT,
+      type TEXT,
+      points INTEGER DEFAULT 0,
+      start_at TIMESTAMPTZ,
+      end_at TIMESTAMPTZ,
+      active BOOLEAN DEFAULT TRUE
+    );
+  `);
+
+  // table global_progress
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS global_progress (
+      id SERIAL PRIMARY KEY,
+      points INTEGER DEFAULT 0
+    );
+  `);
+
+  // table rewards
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS rewards (
+      id SERIAL PRIMARY KEY,
+      points_required INTEGER,
+      description TEXT
+    );
+  `);
+
+  console.log('✅ Toutes les tables vérifiées/créées');
+}
 
 // --- Middleware device token ---
 app.use((req, res, next) => {

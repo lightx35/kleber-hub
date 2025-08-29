@@ -198,41 +198,60 @@ app.get('/admin', requireAdmin, async (req, res) => {
 app.post('/admin/pending/:id/approve', requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const client = await pool.connect();
+
   try {
     await client.query('BEGIN');
 
-    // Récupérer la pending photo + quest points
+    // Récupérer la pending photo et points de la quête
     const { rows } = await client.query(
-      `SELECT p.*, q.points as quest_points
+      `SELECT p.*, q.points AS quest_points
        FROM pending_photos p
-       LEFT JOIN quests q ON p.quest_id = q.id
-       WHERE p.id = $1 FOR UPDATE`, [id]);
+       LEFT JOIN quests q ON p.quest_id::INTEGER = q.id
+       WHERE p.id = $1 FOR UPDATE`,
+      [id]
+    );
+
     if (rows.length === 0) {
       await client.query('ROLLBACK');
       return res.status(404).send('Pending photo introuvable');
     }
+
     const pending = rows[0];
-    const pts = pending.quest_points || 0;
+    const pts = pending.quest_points ? parseInt(pending.quest_points, 10) : 0;
 
-    // Insérer dans photos
-    await client.query(
-      `INSERT INTO photos (filename, url, user_id, taken_at)
-       VALUES ($1, $2, $3, $4)`, [pending.filename, pending.url, pending.user_id, pending.taken_at]
-    );
-
-    // Mettre à jour progress global
-    if (pts > 0) {
-      await client.query(`UPDATE global_progress SET points = points + $1 WHERE id = 1`, [pts]);
+    // Vérifier que user_id existe pour la clé étrangère
+    if (!pending.user_id) {
+      await client.query('ROLLBACK');
+      return res.status(400).send('User_id manquant pour la photo');
     }
 
-    // Supprimer pending
-    await client.query(`DELETE FROM pending_photos WHERE id = $1`, [id]);
+    // Insérer la photo approuvée
+    await client.query(
+      `INSERT INTO photos (filename, url, user_id, taken_at)
+       VALUES ($1, $2, $3, $4)`,
+      [pending.filename, pending.url, pending.user_id, pending.taken_at]
+    );
+
+    // Mettre à jour la progression globale
+    if (pts > 0) {
+      await client.query(
+        `UPDATE global_progress SET points = points + $1 WHERE id = 1`,
+        [pts]
+      );
+    }
+
+    // Supprimer la photo de pending_photos
+    await client.query(
+      `DELETE FROM pending_photos WHERE id = $1`,
+      [id]
+    );
 
     await client.query('COMMIT');
     res.redirect('/admin');
+
   } catch (err) {
     await client.query('ROLLBACK').catch(() => {});
-    console.error('Approve failed', err);
+    console.error('Approve failed', err.message, err.stack);
     res.status(500).send('Erreur approbation');
   } finally {
     client.release();

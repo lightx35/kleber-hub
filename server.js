@@ -144,6 +144,21 @@ async function requireLogin(req, res, next) {
   next();
 }
 
+// Middleware pour restreindre l'accès à l'admin à Nicolas
+async function requireAdmin(req, res, next) {
+  const user = await getUserByDevice(req.deviceToken);
+  if (!user) {
+    return res.redirect('/'); // pas connecté
+  }
+
+  if (user.username !== 'Nicolas') {
+    return res.status(403).send('Accès refusé'); // utilisateur non autorisé
+  }
+
+  req.user = user; // stocke l'utilisateur
+  next();
+}
+
 // --- Helper: récupérer l’utilisateur depuis son device ---
 async function getUserByDevice(token) {
   const { rows } = await pool.query(
@@ -165,22 +180,6 @@ const upload = multer({
 
 // --- Routes ---
 app.get('/healthz', (req, res) => res.status(200).send('ok'));
-
-// route admin-login (POST) : body { code }
-app.post('/admin-login', (req, res) => {
-  const { code } = req.body || {};
-  if (!process.env.ADMIN_CODE) return res.status(500).send('ADMIN_CODE not set');
-  if (code && code === process.env.ADMIN_CODE) {
-    res.cookie('is_admin', '1', { httpOnly: true, maxAge: 1000*60*60*24 }); // 1 jour
-    return res.redirect('/admin');
-  }
-  res.status(401).send('Code admin incorrect');
-});
-
-function requireAdmin(req, res, next) {
-  if (req.cookies && req.cookies.is_admin === '1') return next();
-  return res.redirect('/'); // ou une page de login admin
-}
 
 app.get('/admin', requireAdmin, async (req, res) => {
   try {
@@ -404,9 +403,9 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     // feedback utilisateur
     res.redirect('/toilet-app'); // ou une page de confirmation
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Erreur upload');
-  }
+    console.error('Upload error:', err);
+    res.status(500).send(`Erreur upload: ${err.message}`);
+}
 });
 
 // Route login

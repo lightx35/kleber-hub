@@ -107,16 +107,16 @@ const galleryItems = document.querySelectorAll('#gallery-display img');
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightbox-img');
 const lightboxClose = document.getElementById('lightbox-close');
+const lightboxDownload = document.getElementById('lightbox-download');
 
 // Ouvrir la lightbox au clic
 galleryItems.forEach(img => {
   img.addEventListener('click', () => {
     lightbox.style.display = 'flex';
     lightboxImg.src = img.src; // récupère l'image cliquée
-    // Mettre à jour le lien de téléchargement
-    const downloadLink = document.getElementById('lightbox-download');
-    downloadLink.href = img.src;
-    downloadLink.download = img.src.split('/').pop(); // nom du fichier
+
+    const photoId = img.dataset.photoId; 
+    lightboxDownload.href = `/download/${photoId}`;
   });
 });
 

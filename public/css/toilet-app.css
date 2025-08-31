@@ -107,9 +107,6 @@ header h1 {
 }
 
 #progress-indicator {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     position: relative;
     z-index: 2;
     width: 37.5%;
@@ -117,9 +114,8 @@ header h1 {
     background-color: #0046FF;
 }
 
-#progress-indicator p {
-    margin: 0;
-    color: white;
+#progress-text {
+    margin: 0 auto;
     font-size: clamp(0.6em, 1.5vw, 100rem);
 }
 

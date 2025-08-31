@@ -75,6 +75,27 @@ function safeParse(json) {
   try { return JSON.parse(json); } catch { return null; }
 }
 
+// Texte "nb / objectif"
+const progressValue = next
+  ? `${Math.min(totalPoints, endPoints)}/${endPoints}`
+  : `${totalPoints}`;
+
+text.textContent = progressValue;
+
+// Vérifier largeur de la barre en pourcentage
+if (percent < 30) {
+  // Si trop petit → texte centré sur la barre de fond
+  text.style.left = "50%";
+  text.style.transform = "translateX(-50%)";
+  text.style.color = "#000"; // texte noir pour contraste sur fond clair
+} else {
+  // Sinon → texte dans la barre colorée
+  text.style.position = "relative";
+  text.style.left = "0";
+  text.style.transform = "none";
+  text.style.color = "#ffffff"; // texte blanc sur fond coloré
+}
+
 //--------------nav-------------------
 
 const sections = {

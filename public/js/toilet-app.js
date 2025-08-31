@@ -85,9 +85,10 @@ text.textContent = progressValue;
 // Vérifier largeur de la barre en pourcentage
 if (percent < 30) {
   // Si trop petit → texte centré sur la barre de fond
+  text.style.position = "absolute";
   text.style.left = "50%";
   text.style.transform = "translateX(-50%)";
-  text.style.color = "#000"; // texte noir pour contraste sur fond clair
+  text.style.color = "#000000"; // texte noir pour contraste sur fond clair
 } else {
   // Sinon → texte dans la barre colorée
   text.style.position = "relative";

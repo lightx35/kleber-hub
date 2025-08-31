@@ -85,12 +85,17 @@
 
   <!-- Quêtes hebdomadaires -->
   <section>
-    <h2>Créer une quête hebdomadaire</h2>
+    <h2>Créer une quête</h2>
     <form method="POST" action="/admin/quests/create">
+      <select name="type" required>
+        <option value="1">Quête journalière</option>
+        <option value="2">Quête spéciale</option>
+        <option value="3">Quête hebdomadaire</option>
+      </select>
       <input type="text" name="title" placeholder="Titre" required>
       <input type="number" name="points" placeholder="Points" required>
-      <input type="date" name="start_at" required>
-      <input type="date" name="end_at" required>
+      <input type="date" name="start_at">
+      <input type="date" name="end_at">
       <button type="submit">Créer</button>
     </form>
 
@@ -98,7 +103,9 @@
     <ul>
       <% quests.forEach(q => { %>
         <li>
-          <%= q.title %> (<%= q.type %>, <%= q.points %> points)
+          <%= q.title %> (
+          <% if (q.type === 1) { %>Quotidienne<% } else if (q.type === 2) { %>Spéciale<% } else if (q.type === 3) { %>Hebdomadaire<% } else { %><%= q.type %><% } %>,
+          <%= q.points %> points)
           <% if (q.start_at) { %>
             du <%= q.start_at.toISOString().slice(0,10) %> au <%= q.end_at.toISOString().slice(0,10) %>
           <% } %>

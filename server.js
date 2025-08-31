@@ -197,7 +197,7 @@ app.get('/admin', requireAdmin, async (req, res) => {
   }
 });
 
-// --- Approuver une photo en attente ---
+// --- Approuver une quete en attente ---
 app.post('/admin/pending/:id/approve', requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const client = await pool.connect();
@@ -258,7 +258,7 @@ app.post('/admin/pending/:id/approve', requireAdmin, async (req, res) => {
   }
 });
 
-// --- Rejeter une photo en attente ---
+// --- Rejeter quete en attente ---
 app.post('/admin/pending/:id/reject', requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const client = await pool.connect();
@@ -297,6 +297,7 @@ app.post('/admin/pending/:id/reject', requireAdmin, async (req, res) => {
   }
 });
 
+//supprilmer une photo de la gallerie
 app.post('/admin/photo/:id/delete', requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   try {
@@ -315,7 +316,7 @@ app.post('/admin/photo/:id/delete', requireAdmin, async (req, res) => {
   }
 });
 
-
+//créer un utilisateur
 app.post('/admin/users/create', requireAdmin, async (req, res) => {
   const { username, password, profile_pic } = req.body;
   if (!username || !password) return res.status(400).send('Missing');
@@ -332,6 +333,7 @@ app.post('/admin/users/create', requireAdmin, async (req, res) => {
   }
 });
 
+//supprimer un utilisateur
 app.post('/admin/users/:id/delete', requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   try {
@@ -343,13 +345,21 @@ app.post('/admin/users/:id/delete', requireAdmin, async (req, res) => {
   }
 });
 
+//créer une quête
 app.post('/admin/quests/create', requireAdmin, async (req, res) => {
-  const { title, points, start_at, end_at } = req.body;
+  const { title, points, start_at, end_at, type } = req.body;
   try {
     await pool.query(
       `INSERT INTO quests (title, description, type, points, start_at, end_at, active)
-       VALUES ($1, $2, 'weekly', $3, $4, $5, true)`,
-      [title, '', parseInt(points,10) || 0, start_at, end_at]
+       VALUES ($1, $2, $3, $4, $5, $6, true)`,
+      [
+        title,
+        '', // description vide pour l'instant
+        parseInt(type, 10), // on stocke l’ID du type (1=daily,2=special,3=weekly)
+        parseInt(points, 10) || 0,
+        type == 3 ? start_at || null : null, // seulement si weekly
+        type == 3 ? end_at || null : null
+      ]
     );
     res.redirect('/admin');
   } catch (e) {
@@ -375,8 +385,8 @@ app.get('/', async (req, res) => {
 // --- Route Toilet App ---
 app.get('/toilet-app', requireLogin, async (req, res) => {
   try {
-    // Récupération des photos avec le nom de l'utilisateur
-    const { rows } = await pool.query(`
+    // Photos
+    const { rows: photos } = await pool.query(`
       SELECT photos.*, users.username, users.profile_pic
       FROM photos
       JOIN users ON photos.user_id = users.id
@@ -384,12 +394,35 @@ app.get('/toilet-app', requireLogin, async (req, res) => {
       LIMIT 200
     `);
 
+    // Progression & rewards
     const progressRow = (await pool.query('SELECT points FROM global_progress WHERE id = 1')).rows[0];
     const totalPoints = progressRow ? parseInt(progressRow.points,10) : 0;
-    const rewards = (await pool.query('SELECT * FROM rewards ORDER BY points_required')).rows;
+    const { rows: rewards } = await pool.query(
+      `SELECT id, points_required, svg
+       FROM rewards
+       ORDER BY points_required ASC`
+    );
 
-    // render with totalPoints & rewards
-    res.render('toilet-app', { photos: rows, user: req.user, totalPoints, rewards });
+    // Quêtes par type (integer IDs)
+    const { rows: quests } = await pool.query(`
+      SELECT * FROM quests
+      WHERE active = true
+      ORDER BY id DESC
+    `);
+
+    const dailyQuests   = quests.filter(q => q.type === 1);
+    const specialQuests = quests.filter(q => q.type === 2);
+    const weeklyQuests  = quests.filter(q => q.type === 3);
+
+    res.render('toilet-app', { 
+      photos, 
+      user: req.user, 
+      totalPoints, 
+      rewards,
+      dailyQuests,
+      specialQuests,
+      weeklyQuests
+    });
 
   } catch (e) {
     console.error(e);

@@ -87,6 +87,11 @@ header h1 {
     margin-left: -0.1vw;
 }
 
+.goal img {
+    width: 10px;
+    height: 10px;
+}
+
 #progress-bar {
     display: flex;
     align-items: center;

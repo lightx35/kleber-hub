@@ -189,8 +189,9 @@ app.get('/admin', requireAdmin, async (req, res) => {
     const users = (await pool.query('SELECT id, username FROM users ORDER BY username')).rows;
     const quests = (await pool.query('SELECT * FROM quests ORDER BY id DESC')).rows;
     const progress = (await pool.query('SELECT points FROM global_progress WHERE id = 1')).rows[0];
+    const photos = (await pool.query('SELECT * FROM photos ORDER BY uploaded_at DESC')).rows;
 
-    res.render('admin', { pending, users, quests, progress });
+    res.render('admin', { pending, users, quests, progress,photos });
   } catch (e) {
     console.error(e);
     res.status(500).send('Erreur admin');
@@ -354,7 +355,7 @@ app.post('/admin/quests/create', requireAdmin, async (req, res) => {
        VALUES ($1, $2, $3, $4, $5, $6, true)`,
       [
         title,
-        '', // description vide pour l'instant
+        description || '', 
         parseInt(type, 10), // on stocke l’ID du type (1=daily,2=special,3=weekly)
         parseInt(points, 10) || 0,
         type == 3 ? start_at || null : null, // seulement si weekly

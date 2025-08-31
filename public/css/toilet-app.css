@@ -71,11 +71,15 @@ header h1 {
 }
 
 .goal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     position: relative;
     z-index: 3;
     height: 100%;
     aspect-ratio: 1/1;
     border-radius: 100px;
+    padding: 0;
     background-color: #FF8040;
     
 }
@@ -88,8 +92,8 @@ header h1 {
 }
 
 .goal img {
-    width: 10px;
-    height: 10px;
+    aspect-ratio: 1/1;
+    width: 60%;
 }
 
 #progress-bar {

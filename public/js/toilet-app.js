@@ -113,6 +113,10 @@ galleryItems.forEach(img => {
   img.addEventListener('click', () => {
     lightbox.style.display = 'flex';
     lightboxImg.src = img.src; // récupère l'image cliquée
+    // Mettre à jour le lien de téléchargement
+    const downloadLink = document.getElementById('lightbox-download');
+    downloadLink.href = img.src;
+    downloadLink.download = img.src.split('/').pop(); // nom du fichier
   });
 });
 

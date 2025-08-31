@@ -93,6 +93,7 @@
         <option value="3">Quête hebdomadaire</option>
       </select>
       <input type="text" name="title" placeholder="Titre" required>
+      <textarea name="description" placeholder="Description de la quête"></textarea>
       <input type="number" name="points" placeholder="Points" required>
       <input type="date" name="start_at">
       <input type="date" name="end_at">
@@ -114,5 +115,19 @@
     </ul>
   </section>
 
+<h2>Gallerie</h2>
+<div id="admin-gallery">
+  <% photos.forEach(photo => { %>
+    <div class="admin-photo">
+      <img src="<%= photo.url %>" alt="photo">
+      <div class="photo-actions">
+        <form method="POST" action="/admin/photo/<%= photo.id %>/delete" style="display:inline;">
+          <button type="submit">Supprimer</button>
+        </form>
+        <a href="<%= photo.url %>" download>Télécharger</a>
+      </div>
+    </div>
+  <% }) %>
+</div>
 </body>
 </html>

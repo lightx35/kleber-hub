@@ -90,7 +90,7 @@
       <div id="gallery-display">
           <% if (photos.length > 0) { %>
             <% photos.forEach(photo => { %>
-              <img src="<%= photo.url %>" alt="photo" data-photo-id="<%= photo.id %>">
+              <img src="<%= photo.url %>" alt="photo">
           <% }) %>
           <% } else { %>
             <p>Aucune photo pour le moment.</p>
@@ -99,7 +99,6 @@
           <div id="lightbox">
             <span id="lightbox-close">&times;</span>
             <img id="lightbox-img" src="" alt="">
-            <button id="lightbox-download" data-photo-id="">Télécharger</button>
           </div>
       </div>
       <div id="award-display"></div>

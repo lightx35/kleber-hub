@@ -317,33 +317,6 @@ app.post('/admin/photo/:id/delete', requireAdmin, async (req, res) => {
   }
 });
 
-//telecharger une photo
-
-const axios = require('axios'); // si pas déjà installé : npm install axios
-
-app.get('/download/:id', requireLogin, async (req, res) => {
-  try {
-    const id = parseInt(req.params.id, 10);
-    const { rows } = await pool.query('SELECT filename, url FROM photos WHERE id = $1', [id]);
-    if (!rows[0]) return res.status(404).send('Photo introuvable');
-
-    const photo = rows[0];
-
-    // Récupérer l'image depuis Cloudinary
-    const response = await axios.get(photo.url, { responseType: 'stream' });
-
-    // Définir les headers pour forcer le téléchargement
-    res.setHeader('Content-Disposition', `attachment; filename="${photo.filename}"`);
-    res.setHeader('Content-Type', response.headers['content-type']);
-
-    // Envoyer le flux au client
-    response.data.pipe(res);
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Erreur téléchargement');
-  }
-});
 
 //créer un utilisateur
 app.post('/admin/users/create', requireAdmin, async (req, res) => {

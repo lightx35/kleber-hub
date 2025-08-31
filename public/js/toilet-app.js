@@ -109,22 +109,63 @@ const lightboxImg = document.getElementById('lightbox-img');
 const lightboxClose = document.getElementById('lightbox-close');
 const lightboxDownload = document.getElementById('lightbox-download');
 
-// Ouvrir la lightbox au clic
+// Détecter mobile
+const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+
+// Ouvrir lightbox
 galleryItems.forEach(img => {
   img.addEventListener('click', () => {
     lightbox.style.display = 'flex';
-    lightboxImg.src = img.src; // récupère l'image cliquée
+    lightboxImg.src = img.src;
+    lightboxDownload.dataset.filename = img.src.split('/').pop();
 
-    const photoId = img.dataset.photoId; 
-    lightboxDownload.href = `/download/${photoId}`;
+    lightboxDownload.textContent = isMobile ? 'Sauvegarder dans la Galerie' : 'Télécharger';
   });
 });
 
-// Fermer en cliquant sur le bouton ✖
+// Fermer lightbox
 lightboxClose.addEventListener('click', () => {
-      lightbox.style.display = 'none';
+  lightbox.style.display = 'none';
 });
 
+// Fonction pour sauvegarder sur mobile
+async function saveToGallery(url, filename) {
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const file = new File([blob], filename, { type: blob.type });
+
+    if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: filename });
+    } else {
+      // Desktop ou fallback mobile : téléchargement classique
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  } catch (err) {
+    console.error('Erreur sauvegarde:', err);
+    // fallback : téléchargement classique
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+}
+
+// Clic sur télécharger
+lightboxDownload.addEventListener('click', async (e) => {
+  e.preventDefault();
+  const filename = lightboxDownload.dataset.filename;
+  if (!filename) return;
+
+  await saveToGallery(lightboxImg.src, filename);
+});
 
 
 //-----------upload quest img ----------------

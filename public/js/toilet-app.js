@@ -151,22 +151,21 @@ lightboxClose.addEventListener('click', () => {
 //-----------upload quest img ----------------
 
 document.addEventListener("DOMContentLoaded", () => {
-  const questButtons = document.querySelectorAll(".submit-quest");
   const fileInput = document.getElementById("questUploadInput");
   const questForm = document.getElementById("questUploadForm");
   const questIdField = document.getElementById("questUploadQuestId");
 
-  questButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const questId = btn.getAttribute("data-quest-id");
-      questIdField.value = questId;
-      fileInput.click(); // ouvre la boîte de dialogue
-    });
+  document.getElementById("quest-display").addEventListener("click", (e) => {
+    const btn = e.target.closest(".submit-quest");
+    if (!btn) return; // clic ailleurs
+    const questId = btn.dataset.questId;
+    questIdField.value = questId;
+    fileInput.click();
   });
 
   fileInput.addEventListener("change", () => {
     if (fileInput.files.length > 0) {
-      questForm.submit(); // envoie vers /upload
+      questForm.submit();
     }
   });
 });

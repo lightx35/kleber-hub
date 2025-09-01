@@ -75,27 +75,6 @@ function safeParse(json) {
   try { return JSON.parse(json); } catch { return null; }
 }
 
-// Texte "nb / objectif"
-const progressValue = next
-  ? `${Math.min(totalPoints, endPoints)}/${endPoints}`
-  : `${totalPoints}`;
-
-text.textContent = progressValue;
-
-// Vérifier largeur de la barre en pourcentage
-if (percent < 30) {
-  // Si trop petit → texte centré sur la barre de fond
-  text.style.position = "absolute";
-  text.style.left = "50%";
-  text.style.transform = "translateX(-50%)";
-  text.style.color = "#000000"; // texte noir pour contraste sur fond clair
-} else {
-  // Sinon → texte dans la barre colorée
-  text.style.position = "relative";
-  text.style.left = "0";
-  text.style.transform = "none";
-  text.style.color = "#ffffff"; // texte blanc sur fond coloré
-}
 
 //--------------nav-------------------
 
@@ -151,21 +130,22 @@ lightboxClose.addEventListener('click', () => {
 //-----------upload quest img ----------------
 
 document.addEventListener("DOMContentLoaded", () => {
+  const questButtons = document.querySelectorAll(".submit-quest");
   const fileInput = document.getElementById("questUploadInput");
   const questForm = document.getElementById("questUploadForm");
   const questIdField = document.getElementById("questUploadQuestId");
 
-  document.getElementById("quest-display").addEventListener("click", (e) => {
-    const btn = e.target.closest(".submit-quest");
-    if (!btn) return; // clic ailleurs
-    const questId = btn.dataset.questId;
-    questIdField.value = questId;
-    fileInput.click();
+  questButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const questId = btn.getAttribute("data-quest-id");
+      questIdField.value = questId;
+      fileInput.click(); // ouvre la boîte de dialogue
+    });
   });
 
   fileInput.addEventListener("change", () => {
     if (fileInput.files.length > 0) {
-      questForm.submit();
+      questForm.submit(); // envoie vers /upload
     }
   });
 });

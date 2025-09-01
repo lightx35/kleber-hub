@@ -119,6 +119,7 @@ header h1 {
 
 #progress-text {
     margin: 0;
+    color: white;
     font-size: clamp(0.6em, 1.5vw, 100rem);
 }
 

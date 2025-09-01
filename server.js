@@ -16,6 +16,7 @@ const dotenv = require('dotenv');
 const crypto = require('crypto');
 const cloudinary = require('cloudinary').v2;
 const bcrypt = require('bcrypt');
+const cron = require('node-cron');
 
 
 dotenv.config();
@@ -93,7 +94,8 @@ async function initDb() {
       points INTEGER DEFAULT 0,
       start_at TIMESTAMPTZ,
       end_at TIMESTAMPTZ,
-      active BOOLEAN DEFAULT TRUE
+      active BOOLEAN DEFAULT TRUE,
+      completed BOOLEAN DEFAULT FALSE
     );
   `);
 
@@ -256,6 +258,14 @@ app.post('/admin/pending/:id/approve', requireAdmin, async (req, res) => {
 
     // 5️⃣ Supprimer la pending photo
     await client.query('DELETE FROM pending_photos WHERE id = $1', [id]);
+    
+    // 6 Marquer la quete comme complete
+    if (pending.quest_id) {
+      await client.query(
+        'UPDATE quests SET completed = TRUE WHERE id = $1',
+        [pending.quest_id]
+      );
+    }
 
     await client.query('COMMIT');
     res.redirect('/admin');
@@ -421,12 +431,10 @@ app.get('/toilet-app', requireLogin, async (req, res) => {
       SELECT *
       FROM quests
       WHERE active = true
-        AND (
-          type != 3
-          OR (start_at <= NOW() AND end_at >= NOW())
-        )
+        AND (type != 3 OR (start_at <= NOW() AND end_at >= NOW()))
       ORDER BY id DESC
     `);
+
     const dailyQuests   = quests.filter(q => q.type === 1);
     const specialQuests = quests.filter(q => q.type === 2);
     const weeklyQuests  = quests.filter(q => q.type === 3);
@@ -552,6 +560,22 @@ app.get('/logout', (req, res) => {
 
 // Démarrage
 initDb().then(async () => {
+  // Reset quotidien des quêtes journalières et spéciales à minuit
+  cron.schedule('0 0 * * *', async () => {
+    try {
+      console.log('🔄 Reset quotidien des quêtes journalières et spéciales');
+      await pool.query(`
+        UPDATE quests
+        SET completed = FALSE
+        WHERE type = 1 OR type = 2
+      `);
+      console.log('✅ Quêtes reset effectuées');
+    } catch (err) {
+      console.error('Erreur lors du reset quotidien des quêtes:', err);
+    }
+  }, {
+    timezone: 'Europe/Paris' // <-- adapte à ton fuseau horaire
+  });
   await refreshWeeklyQuestsActive(); // <<< appel initial
   app.listen(PORT, () => {
     console.log(`✅ Serveur démarré sur port ${PORT}`);

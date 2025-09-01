@@ -349,7 +349,7 @@ app.post('/admin/users/:id/delete', requireAdmin, async (req, res) => {
 
 //créer une quête
 app.post('/admin/quests/create', requireAdmin, async (req, res) => {
-  const { title, points, start_at, end_at, type } = req.body;
+  const { title, description, points, start_at, end_at, type } = req.body;
   try {
     await pool.query(
       `INSERT INTO quests (title, description, type, points, start_at, end_at, active)

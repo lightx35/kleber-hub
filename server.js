@@ -117,6 +117,15 @@ async function initDb() {
   console.log('✅ Toutes les tables vérifiées/créées');
 }
 
+// --- Helper: mise à jour des quêtes hebdomadaires ---
+async function refreshWeeklyQuestsActive() {
+  await pool.query(`
+    UPDATE quests
+    SET active = COALESCE(CURRENT_DATE BETWEEN start_at AND end_at, false)
+    WHERE type = 3
+  `);
+}
+
 // --- Middleware device token ---
 app.use((req, res, next) => {
   let token = req.cookies.device_token;
@@ -185,6 +194,7 @@ app.get('/healthz', (req, res) => res.status(200).send('ok'));
 //route admin
 app.get('/admin', requireAdmin, async (req, res) => {
   try {
+    await refreshWeeklyQuestsActive();
     const pending = (await pool.query('SELECT p.*, u.username FROM pending_photos p LEFT JOIN users u ON p.user_id = u.id ORDER BY p.created_at DESC')).rows;
     const users = (await pool.query('SELECT id, username FROM users ORDER BY username')).rows;
     const quests = (await pool.query('SELECT * FROM quests ORDER BY id DESC')).rows;
@@ -387,6 +397,7 @@ app.get('/', async (req, res) => {
 // --- Route Toilet App ---
 app.get('/toilet-app', requireLogin, async (req, res) => {
   try {
+    await refreshWeeklyQuestsActive();
     // Photos
     const { rows: photos } = await pool.query(`
       SELECT photos.*, users.username, users.profile_pic
@@ -536,7 +547,8 @@ app.get('/logout', (req, res) => {
 });
 
 // Démarrage
-initDb().then(() => {
+initDb().then(async () => {
+  await refreshWeeklyQuestsActive(); // <<< appel initial
   app.listen(PORT, () => {
     console.log(`✅ Serveur démarré sur port ${PORT}`);
   });

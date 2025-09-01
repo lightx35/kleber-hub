@@ -418,11 +418,15 @@ app.get('/toilet-app', requireLogin, async (req, res) => {
 
     // Quêtes par type (integer IDs)
     const { rows: quests } = await pool.query(`
-      SELECT * FROM quests
+      SELECT *
+      FROM quests
       WHERE active = true
+        AND (
+          type != 3
+          OR (start_at <= NOW() AND end_at >= NOW())
+        )
       ORDER BY id DESC
     `);
-
     const dailyQuests   = quests.filter(q => q.type === 1);
     const specialQuests = quests.filter(q => q.type === 2);
     const weeklyQuests  = quests.filter(q => q.type === 3);

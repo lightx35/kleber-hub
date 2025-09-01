@@ -561,7 +561,7 @@ app.get('/logout', (req, res) => {
 // Démarrage
 initDb().then(async () => {
   // Reset quotidien des quêtes journalières et spéciales à minuit
-  cron.schedule('30 22 * * *', async () => {
+  cron.schedule('34 22 * * *', async () => {
     try {
       console.log('🔄 Reset quotidien des quêtes journalières et spéciales');
       await pool.query(`

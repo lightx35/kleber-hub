@@ -116,6 +116,21 @@ async function initDb() {
     );
   `);
 
+    // table system_status : stocke la date du dernier reset quotidien
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS system_status (
+      id INTEGER PRIMARY KEY,
+      last_daily_reset DATE
+    );
+  `);
+
+  // s'assurer qu'il y a une ligne id=1 (ON CONFLICT évite les doublons)
+  await pool.query(`
+    INSERT INTO system_status (id, last_daily_reset)
+    VALUES (1, NULL)
+    ON CONFLICT (id) DO NOTHING
+  `);
+
   console.log('✅ Toutes les tables vérifiées/créées');
 }
 
@@ -126,6 +141,58 @@ async function refreshWeeklyQuestsActive() {
     SET active = COALESCE(CURRENT_DATE BETWEEN start_at AND end_at, false)
     WHERE type = 3
   `);
+}
+
+// --- Helper: reset quotidien des quêtes journalières + spéciales si nécessaire ---
+async function ensureDailyReset() {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // s'assurer qu'il y a bien la ligne de status (id=1)
+    await client.query(`
+      INSERT INTO system_status (id, last_daily_reset)
+      VALUES (1, NULL)
+      ON CONFLICT (id) DO NOTHING
+    `);
+
+    // On demande au serveur Postgres si la dernière reset est < date courante
+    // Ici on utilise la date en fuseau 'Europe/Paris' pour être cohérent avec ton cron.
+    const { rows } = await client.query(`
+      SELECT (COALESCE(last_daily_reset, '1970-01-01') < (CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Paris')::date) AS needs_reset
+      FROM system_status
+      WHERE id = 1
+      FOR UPDATE
+    `);
+
+    const needsReset = rows.length ? rows[0].needs_reset : true;
+
+    if (needsReset) {
+      // 1) reset des flags completed pour type 1 (journ.) et 2 (special)
+      await client.query(`
+        UPDATE quests
+        SET completed = FALSE
+        WHERE type IN (1,2)
+      `);
+
+      // 2) mettre à jour last_daily_reset à la date du jour (Paris)
+      await client.query(`
+        UPDATE system_status
+        SET last_daily_reset = (CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Paris')::date
+        WHERE id = 1
+      `);
+
+      console.log('✅ Reset quotidien effectué (ensureDailyReset)');
+    }
+
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error('Erreur ensureDailyReset:', err);
+    // ne pas re-jeter l'erreur: on veut que la route continue (affichage) même si reset échoue
+  } finally {
+    client.release();
+  }
 }
 
 // --- Middleware device token ---
@@ -407,6 +474,7 @@ app.get('/', async (req, res) => {
 // --- Route Toilet App ---
 app.get('/toilet-app', requireLogin, async (req, res) => {
   try {
+    await ensureDailyReset();
     await refreshWeeklyQuestsActive();
     // Photos
     const { rows: photos } = await pool.query(`
@@ -560,22 +628,7 @@ app.get('/logout', (req, res) => {
 
 // Démarrage
 initDb().then(async () => {
-  // Reset quotidien des quêtes journalières et spéciales à minuit
-  cron.schedule('0 0 * * *', async () => {
-    try {
-      console.log('🔄 Reset quotidien des quêtes journalières et spéciales');
-      await pool.query(`
-        UPDATE quests
-        SET completed = FALSE
-        WHERE type = 1 OR type = 2
-      `);
-      console.log('✅ Quêtes reset effectuées');
-    } catch (err) {
-      console.error('Erreur lors du reset quotidien des quêtes:', err);
-    }
-  }, {
-    timezone: 'Europe/Paris' // <-- adapte à ton fuseau horaire
-  });
+  await ensureDailyReset();
   await refreshWeeklyQuestsActive(); // <<< appel initial
   app.listen(PORT, () => {
     console.log(`✅ Serveur démarré sur port ${PORT}`);
